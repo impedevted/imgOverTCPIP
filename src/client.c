@@ -10,14 +10,76 @@
 //This function is to be used once we have confirmed that an image is to be sent
 //It should read and output an image file
 
+char img_dir[] = "./image/";
+char img_filename_1[] = "capture1.jpeg";
+char img_filename_2[] = "capture2.jpeg";
 
+int send_image(int socket, char *img_name)
+{
+
+    FILE *picture;
+    int size, read_size, stat, packet_index;
+    char send_buffer[10240], read_buffer[256];
+    packet_index = 1;
+
+    picture = fopen(img_name, "r");
+    printf("Getting Picture Size\n");   
+
+    if(picture == NULL) 
+    {
+        printf("Error Opening Image File"); 
+    } 
+
+    fseek(picture, 0, SEEK_END);
+    size = ftell(picture);
+    fseek(picture, 0, SEEK_SET);
+    printf("Total Picture size: %i\n",size);
+
+    //Send Picture Size
+    printf("Sending Picture Size\n");
+    write(socket, (void *)&size, sizeof(int));
+
+    //Send Picture as Byte Array
+    printf("Sending Picture as Byte Array\n");
+
+    do { //Read while we get errors that are due to signals.
+        stat=read(socket, &read_buffer , 255);
+        printf("Bytes read: %i\n",stat);
+    } while (stat < 0);
+
+    printf("Received data in socket\n");
+    //printf("Socket data: %c\n", read_buffer);
+
+    while(!feof(picture)) 
+    {
+    //while(packet_index = 1){
+        //Read from the file into our send buffer
+        read_size = fread(send_buffer, 1, sizeof(send_buffer)-1, picture);
+
+        //Send data through our socket 
+        do{
+        stat = write(socket, send_buffer, read_size);  
+        }while (stat < 0);
+
+        printf("Packet Number: %i\n",packet_index);
+        printf("Packet Size Sent: %i\n",read_size);     
+        printf(" \n");
+        printf(" \n");
+
+
+        packet_index++;  
+
+        //Zero out our send buffer
+        bzero(send_buffer, sizeof(send_buffer));
+    }
+}
 
 int receive_image(int socket, char *img_name)
 { // Start function 
 
     int buffersize = 0, recv_size = 0,size = 0, read_size, write_size, packet_index =1,stat;
 
-    char imagearray[10241],verify = '1';
+    char imagearray[10241], verify = '1';
     FILE *image;
 
     //Find the size of the image
@@ -59,7 +121,7 @@ int receive_image(int socket, char *img_name)
     //while(packet_index < 2){
 
         FD_ZERO(&fds);
-        FD_SET(socket,&fds);
+        FD_SET(socket, &fds);
 
         buffer_fd = select(FD_SETSIZE,&fds,NULL,NULL,&timeout);
 
@@ -73,9 +135,9 @@ int receive_image(int socket, char *img_name)
         {
             do{
                 read_size = read(socket,imagearray, 10241);
-                }while(read_size <0);
+            }while(read_size <0);
 
-                printf("Packet number received: %i\n",packet_index);
+            printf("Packet number received: %i\n",packet_index);
             printf("Packet size: %i\n",read_size);
 
 
@@ -83,9 +145,10 @@ int receive_image(int socket, char *img_name)
             write_size = fwrite(imagearray,1,read_size, image);
             printf("Written image size: %i\n",write_size); 
 
-                if(read_size !=write_size) {
-                    printf("error in read write\n");    }
-
+                if(read_size !=write_size) 
+                {
+                    printf("error in read write\n");    
+                }
 
                 //Increment the total number of bytes read
                 recv_size += read_size;
@@ -103,12 +166,12 @@ int receive_image(int socket, char *img_name)
 
 }
 
+
 int main(int argc , char *argv[])
 {
 
     int socket_desc;
     struct sockaddr_in server;
-    char *parray;
 
 
     //Create socket
@@ -135,9 +198,15 @@ int main(int argc , char *argv[])
 
     puts("Connected\n");
 
-    receive_image(socket_desc, "Output.jpeg");
+    receive_image(socket_desc, strcat(img_dir, "Out1_capture.jpeg"));
+
+    // send_image(socket_desc, strcat(img_dir, img_filename_2));
+
+
 
     close(socket_desc);
+
+    printf("Client Socket Closed!");
 
     return 0;
 }
