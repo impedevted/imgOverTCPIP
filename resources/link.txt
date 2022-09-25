@@ -1,0 +1,7 @@
+https://www.csd.uoc.gr/~hy556/material/tutorials/cs556-3rd-tutorial.pdf
+
+https://stackoverflow.com/questions/15445207/sending-image-jpeg-through-socket-in-c-linux
+
+https://www.codeproject.com/Articles/586000/Networking-and-Socket-programming-tutorial-in-C
+
+https://idiotdeveloper.com/file-transfer-using-udp-socket-in-c/
