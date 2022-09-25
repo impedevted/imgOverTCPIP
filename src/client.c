@@ -166,13 +166,10 @@ int receive_image(int socket, char *img_name)
 
 }
 
-
-int main(int argc , char *argv[])
+int socket_init_client()
 {
-
     int socket_desc;
     struct sockaddr_in server;
-
 
     //Create socket
     socket_desc = socket(AF_INET , SOCK_STREAM , 0);
@@ -198,15 +195,25 @@ int main(int argc , char *argv[])
 
     puts("Connected\n");
 
-    receive_image(socket_desc, strcat(img_dir, "Out1_capture.jpeg"));
-
-    // send_image(socket_desc, strcat(img_dir, img_filename_2));
-
+    return socket_desc;
+}
 
 
-    close(socket_desc);
+int main(int argc , char *argv[])
+{
 
-    printf("Client Socket Closed!");
+    int socket_desc_main;
+
+    socket_desc_main = socket_init_client();
+
+    receive_image(socket_desc_main, strcat(img_dir, "Out1_capture.jpeg"));
+
+    // send_image(socket_desc_main, strcat(img_dir, img_filename_2));
+
+
+    close(socket_desc_main);
+
+    printf("Client Socket Closed!\n");
 
     return 0;
 }

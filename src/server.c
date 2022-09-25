@@ -161,12 +161,10 @@ int receive_image(int socket, char *img_name)
 
 }
 
-
-int main(int argc , char *argv[])
+int socket_init_server()
 {
-    int socket_desc , new_socket , c;
+    int socket_desc;
     struct sockaddr_in server , client;
-
     //Create socket
     socket_desc = socket(AF_INET , SOCK_STREAM , 0);
     if (socket_desc == -1)
@@ -193,6 +191,16 @@ int main(int argc , char *argv[])
 
     //Accept and incoming connection
     puts("Waiting for incoming connections...");
+    
+
+    return socket_desc;
+}
+
+int socket_handshake_server(int socket_desc)
+{
+    int new_socket, c;
+    struct sockaddr_in client;
+
     c = sizeof(struct sockaddr_in);
 
     if((new_socket = accept(socket_desc, (struct sockaddr *)&client,(socklen_t*)&c)))
@@ -208,14 +216,25 @@ int main(int argc , char *argv[])
         return 1;
     }
 
-    send_image(new_socket, strcat(img_dir, img_filename_1));
+    return new_socket;
+}
 
-    // receive_image(new_socket, strcat(img_dir, "Out2_capture.jpeg"));
 
-    close(socket_desc);
+int main(int argc , char *argv[])
+{
+    int socket_desc_main , new_socket_main;
+
+    socket_desc_main = socket_init_server();
+    new_socket_main = socket_handshake_server(socket_desc_main);
+
+    send_image(new_socket_main, strcat(img_dir, img_filename_1));
+
+    close(socket_desc_main);
     fflush(stdout);
 
-    printf("Server Socket Closed!");
+    printf("Server Socket Closed!\n");
+
+    // receive_image(new_socket, strcat(img_dir, "Out2_capture.jpeg"));
 
     return 0;
 }
