@@ -32,13 +32,13 @@ int send_image(int socket, char *img_name)
 
     //Send Picture Size
     printf("Sending Picture Size\n");
-    write(socket, (void *)&size, sizeof(int));
+    send(socket, (void *)&size, sizeof(int), 0);
 
     //Send Picture as Byte Array
     printf("Sending Picture as Byte Array\n");
 
     do { //Read while we get errors that are due to signals.
-        stat=read(socket, &read_buffer , 255);
+        stat = recv(socket, &read_buffer , 255, 0);
         printf("Bytes read: %i\n",stat);
     } while (stat < 0);
 
@@ -53,7 +53,7 @@ int send_image(int socket, char *img_name)
 
         //Send data through our socket 
         do{
-        stat = write(socket, send_buffer, read_size);  
+        stat = send(socket, send_buffer, read_size, 0);  
         }while (stat < 0);
 
         printf("Packet Number: %i\n",packet_index);
@@ -79,7 +79,7 @@ int receive_image(int socket, char *img_name)
 
     //Find the size of the image
     do{
-    stat = read(socket, &size, sizeof(int));
+    stat = recv(socket, &size, sizeof(int), 0);
     }while(stat<0);
 
     printf("Packet received.\n");
@@ -129,7 +129,7 @@ int receive_image(int socket, char *img_name)
         if (buffer_fd > 0)
         {
             do{
-                read_size = read(socket,imagearray, 10241);
+                read_size = recv(socket,imagearray, 10241, 0);
             }while(read_size <0);
 
             printf("Packet number received: %i\n",packet_index);
@@ -192,7 +192,7 @@ int socket_init_server()
     //Accept and incoming connection
     puts("Waiting for incoming connections...");
     
-
+    printf("Debug: socket_desc: %d\n",socket_desc);
     return socket_desc;
 }
 
@@ -225,16 +225,24 @@ int main(int argc , char *argv[])
     int socket_desc_main , new_socket_main;
 
     socket_desc_main = socket_init_server();
+    if (socket_desc_main == 1)
+    {
+        printf("Could not init socket server!\n");
+        return 1;
+    }
+
     new_socket_main = socket_handshake_server(socket_desc_main);
 
     send_image(new_socket_main, strcat(img_dir, img_filename_1));
+    // send_image(new_socket_main, strcat(img_dir, img_filename_2));
+    // printf("--------------------------------\n");
+    // new_socket_main = socket_handshake_server(socket_desc_main);
+
+    // receive_image(new_socket_main, strcat(img_dir, "Out2_capture.jpeg"));
 
     close(socket_desc_main);
     fflush(stdout);
-
-    printf("Server Socket Closed!\n");
-
-    // receive_image(new_socket, strcat(img_dir, "Out2_capture.jpeg"));
+    printf("Server Socket Closed!!!\n");
 
     return 0;
 }
