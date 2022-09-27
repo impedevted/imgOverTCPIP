@@ -5,65 +5,9 @@
 #include<unistd.h>  
 #include<errno.h>
 
-#define SIZE 1024
-
 char img_dir[] = "./image/";
 char img_filename_1[] = "capture1.jpeg";
 char img_filename_2[] = "capture2.jpeg";
-
-int send_text(int socket)
-{
-    int n;
-    char buffer[SIZE] = "Test sending from Server!\n";
-    char rev_buff[SIZE];
-
-    n = send(socket, buffer, sizeof(buffer), 0);
-    if (n <= 0){
-        perror("[-]Error in sending text.");
-        return -1;
-    }
-
-    n = send(socket, buffer, sizeof(buffer), 0);
-    if (n <= 0){
-        perror("[-]Error in sending text.");
-        return -1;
-    }
-
-    n = send(socket, buffer, sizeof(buffer), 0);
-    if (n <= 0){
-        perror("[-]Error in sending text.");
-        return -1;
-    }
-
-    n = recv(socket, rev_buff, SIZE, 0);
-    if (n <= 0)
-    {
-        return -1;
-    }
-    printf("Received Text: %s\n", rev_buff);
-
-
-    bzero(buffer, sizeof(buffer));
-    bzero(rev_buff, sizeof(rev_buff));
-
-    return 0;
-}
-
-int receive_text(int socket)
-{
-    int n;
-    char buffer[SIZE];
-
-    n = recv(socket, buffer, SIZE, 0);
-    if (n <= 0)
-    {
-        return -1;
-    }
-    printf("Received Text: %s\n", buffer);
-
-    bzero(buffer, SIZE);
-    return 0;
-}
 
 int send_image(int socket, char *img_name)
 {
@@ -289,15 +233,13 @@ int main(int argc , char *argv[])
 
     new_socket_main = socket_handshake_server(socket_desc_main);
 
-    send_text(new_socket_main);
-
-    // send_image(new_socket_main, strcat(img_dir, img_filename_2));
+    send_image(new_socket_main, strcat(img_dir, img_filename_1));
     // send_image(new_socket_main, strcat(img_dir, img_filename_2));
     // printf("--------------------------------\n");
     // new_socket_main = socket_handshake_server(socket_desc_main);
 
     // receive_image(new_socket_main, strcat(img_dir, "Out2_capture.jpeg"));
-    
+
     close(socket_desc_main);
     fflush(stdout);
     printf("Server Socket Closed!!!\n");

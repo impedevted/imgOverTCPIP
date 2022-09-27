@@ -6,7 +6,6 @@
 #include<unistd.h>  
 #include<errno.h>
 
-#define SIZE 1024
 
 //This function is to be used once we have confirmed that an image is to be sent
 //It should read and output an image file
@@ -14,60 +13,6 @@
 char img_dir[] = "./image/";
 char img_filename_1[] = "capture1.jpeg";
 char img_filename_2[] = "capture2.jpeg";
-
-int send_text(int socket, char txt[SIZE])
-{
-    int n;
-    char buffer[SIZE];
-
-    n = send(socket, txt, SIZE, 0);
-    if (n <= 0){
-        perror("[-]Error in sending text.");
-        return -1;
-    }
-    bzero(txt, SIZE);
-
-    return 0;
-}
-
-int receive_text(int socket)
-{
-    int n;
-    char send_buff[SIZE] = "Test sending from client!\n";
-    char buffer[SIZE];
-
-    n = recv(socket, buffer, SIZE, 0);
-    if (n <= 0)
-    {
-        return -1;
-    }
-    printf("Received Text: %s\n", buffer);
-
-    n = recv(socket, buffer, SIZE, 0);
-    if (n <= 0)
-    {
-        return -1;
-    }
-    printf("Received Text: %s\n", buffer);
-
-    n = recv(socket, buffer, SIZE, 0);
-    if (n <= 0)
-    {
-        return -1;
-    }
-    printf("Received Text: %s\n", buffer);
-
-    n = send(socket, send_buff, sizeof(send_buff), 0);
-    if (n <= 0){
-        perror("[-]Error in sending text.");
-        return -1;
-    }
-
-    bzero(buffer, sizeof(buffer));
-    bzero(send_buff, sizeof(send_buff));
-
-    return 0;
-}
 
 int send_image(int socket, char *img_name)
 {
@@ -127,8 +72,6 @@ int send_image(int socket, char *img_name)
         //Zero out our send buffer
         bzero(send_buffer, sizeof(send_buffer));
     }
-
-
 }
 
 int receive_image(int socket, char *img_name)
@@ -236,7 +179,7 @@ int socket_init_client()
         printf("Could not create socket");
     }
 
-    memset(&server, 0,sizeof(server));
+    memset(&server,0,sizeof(server));
     server.sin_addr.s_addr = inet_addr("127.0.0.1");
     server.sin_family = AF_INET;
     server.sin_port = htons( 8889 );
@@ -269,9 +212,7 @@ int main(int argc , char *argv[])
         return 1;
     }
 
-    receive_text(socket_desc_main);
-    
-    // receive_image(socket_desc_main, strcat(img_dir, "Out1_capture.jpeg"));
+    receive_image(socket_desc_main, strcat(img_dir, "Out1_capture.jpeg"));
     // receive_image(socket_desc_main, strcat(img_dir, "Out2_capture.jpeg"));
 
     // printf("--------------------------------\n");
