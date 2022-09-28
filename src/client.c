@@ -15,61 +15,38 @@ char img_dir[] = "./image/";
 char img_filename_1[] = "capture1.jpeg";
 char img_filename_2[] = "capture2.jpeg";
 
-int send_text(int socket, char txt[SIZE])
+int send_text(int socket)
 {
     int n;
-    char buffer[SIZE];
+    char buffer[SIZE] = "Test sending from Client!\n";
 
-    n = send(socket, txt, SIZE, 0);
-    if (n <= 0){
-        perror("[-]Error in sending text.");
-        return -1;
-    }
-    bzero(txt, SIZE);
-
-    return 0;
-}
-
-int receive_text(int socket)
-{
-    int n;
-    char send_buff[SIZE] = "Test sending from client!\n";
-    char buffer[SIZE];
-
-    n = recv(socket, buffer, SIZE, 0);
-    if (n <= 0)
-    {
-        return -1;
-    }
-    printf("Received Text: %s\n", buffer);
-
-    n = recv(socket, buffer, SIZE, 0);
-    if (n <= 0)
-    {
-        return -1;
-    }
-    printf("Received Text: %s\n", buffer);
-
-    n = recv(socket, buffer, SIZE, 0);
-    if (n <= 0)
-    {
-        return -1;
-    }
-    printf("Received Text: %s\n", buffer);
-
-    n = send(socket, send_buff, sizeof(send_buff), 0);
+    n = send(socket, buffer, sizeof(buffer), 0);
     if (n <= 0){
         perror("[-]Error in sending text.");
         return -1;
     }
 
     bzero(buffer, sizeof(buffer));
-    bzero(send_buff, sizeof(send_buff));
-
     return 0;
 }
 
-int send_image(int socket, char *img_name)
+int receive_text(int socket)
+{
+    int n;
+    char buffer[SIZE];
+
+    n = recv(socket, buffer, SIZE, 0);
+    if (n <= 0)
+    {
+        return -1;
+    }
+    printf("Received Text: %s\n", buffer);
+
+    bzero(buffer, SIZE);
+    return 0;
+}
+
+int send_image(int socket)
 {
 
     FILE *picture;
@@ -77,7 +54,7 @@ int send_image(int socket, char *img_name)
     char send_buffer[10240], read_buffer[256];
     packet_index = 1;
 
-    picture = fopen(img_name, "r");
+    picture = fopen("./image/capture1.jpeg", "r");
     printf("Getting Picture Size\n");   
 
     if(picture == NULL) 
@@ -127,11 +104,9 @@ int send_image(int socket, char *img_name)
         //Zero out our send buffer
         bzero(send_buffer, sizeof(send_buffer));
     }
-
-
 }
 
-int receive_image(int socket, char *img_name)
+int receive_image(int socket)
 { // Start function 
 
     int buffersize = 0, recv_size = 0,size = 0, read_size, write_size, packet_index =1,stat;
@@ -159,7 +134,7 @@ int receive_image(int socket, char *img_name)
     printf("Reply sent\n");
     printf(" \n");
 
-    image = fopen(img_name, "w");
+    image = fopen("./outputImage/Output_capture.jpeg", "w");
 
     if( image == NULL) {
     printf("Error has occurred. Image file could not be opened\n");
@@ -256,6 +231,18 @@ int socket_init_client()
     return socket_desc;
 }
 
+void delay(int number_of_seconds)
+{
+    // Converting time into milli_seconds
+    int milli_seconds = 1000 * number_of_seconds;
+ 
+    // Storing start time
+    clock_t start_time = clock();
+ 
+    // looping till required time is not achieved
+    while (clock() < start_time + milli_seconds)
+        ;
+}
 
 int main(int argc , char *argv[])
 {
@@ -269,21 +256,25 @@ int main(int argc , char *argv[])
         return 1;
     }
 
-    receive_text(socket_desc_main);
-    
-    // receive_image(socket_desc_main, strcat(img_dir, "Out1_capture.jpeg"));
-    // receive_image(socket_desc_main, strcat(img_dir, "Out2_capture.jpeg"));
+    // receive_text(socket_desc_main);
+    // receive_text(socket_desc_main);
+    // send_text(socket_desc_main);
 
-    // printf("--------------------------------\n");
-    // socket_desc_main = socket_init_client();
-    // if (socket_desc_main == 1)
-    // {
-    //     printf("Could not init socket client!!!\n");
-    //     return 1;
-    // }
+    send_image(socket_desc_main);
+    rename("./outputImage/Output_capture.jpeg", "./outputImage/Output_capture_2.jpeg");
 
-    //send_image(socket_desc_main, strcat(img_dir, img_filename_2));
+    close(socket_desc_main);
+    printf("Client Socket Closed!!!\n");
 
+    delay(100);
+
+    socket_desc_main = socket_init_client();
+    if (socket_desc_main == 1)
+    {
+        printf("Could not init socket client!\n");
+        return 1;
+    }
+    receive_image(socket_desc_main);
     close(socket_desc_main);
     printf("Client Socket Closed!!!\n");
 

@@ -3,7 +3,7 @@
 #include<sys/socket.h>
 #include<arpa/inet.h>   
 #include<unistd.h>  
-#include<errno.h>
+//#include<errno.h>
 
 #define SIZE 1024
 
@@ -15,37 +15,14 @@ int send_text(int socket)
 {
     int n;
     char buffer[SIZE] = "Test sending from Server!\n";
-    char rev_buff[SIZE];
 
     n = send(socket, buffer, sizeof(buffer), 0);
     if (n <= 0){
         perror("[-]Error in sending text.");
         return -1;
     }
-
-    n = send(socket, buffer, sizeof(buffer), 0);
-    if (n <= 0){
-        perror("[-]Error in sending text.");
-        return -1;
-    }
-
-    n = send(socket, buffer, sizeof(buffer), 0);
-    if (n <= 0){
-        perror("[-]Error in sending text.");
-        return -1;
-    }
-
-    n = recv(socket, rev_buff, SIZE, 0);
-    if (n <= 0)
-    {
-        return -1;
-    }
-    printf("Received Text: %s\n", rev_buff);
-
 
     bzero(buffer, sizeof(buffer));
-    bzero(rev_buff, sizeof(rev_buff));
-
     return 0;
 }
 
@@ -65,7 +42,7 @@ int receive_text(int socket)
     return 0;
 }
 
-int send_image(int socket, char *img_name)
+int send_image(int socket)
 {
 
     FILE *picture;
@@ -73,7 +50,7 @@ int send_image(int socket, char *img_name)
     char send_buffer[10240], read_buffer[256];
     packet_index = 1;
 
-    picture = fopen(img_name, "r");
+    picture = fopen("./image/capture2.jpeg", "r");
     printf("Getting Picture Size\n");   
 
     if(picture == NULL) 
@@ -125,7 +102,7 @@ int send_image(int socket, char *img_name)
     }
 }
 
-int receive_image(int socket, char *img_name)
+int receive_image(int socket)
 { // Start function 
 
     int buffersize = 0, recv_size = 0,size = 0, read_size, write_size, packet_index =1,stat;
@@ -153,7 +130,7 @@ int receive_image(int socket, char *img_name)
     printf("Reply sent\n");
     printf(" \n");
 
-    image = fopen(img_name, "w");
+    image = fopen("./outputImage/Output_capture.jpeg", "w");
 
     if( image == NULL) {
     printf("Error has occurred. Image file could not be opened\n");
@@ -283,24 +260,35 @@ int main(int argc , char *argv[])
     socket_desc_main = socket_init_server();
     if (socket_desc_main == 1)
     {
-        printf("Could not init socket server!\n");
+        printf("Could not init socket Server!\n");
         return 1;
     }
 
     new_socket_main = socket_handshake_server(socket_desc_main);
 
-    send_text(new_socket_main);
-
-    // send_image(new_socket_main, strcat(img_dir, img_filename_2));
-    // send_image(new_socket_main, strcat(img_dir, img_filename_2));
-    // printf("--------------------------------\n");
-    // new_socket_main = socket_handshake_server(socket_desc_main);
-
-    // receive_image(new_socket_main, strcat(img_dir, "Out2_capture.jpeg"));
+    // send_text(new_socket_main);
+    // send_text(new_socket_main);
+    // receive_text(new_socket_main);
     
+    receive_image(new_socket_main);
+
     close(socket_desc_main);
     fflush(stdout);
     printf("Server Socket Closed!!!\n");
+
+    socket_desc_main = socket_init_server();
+    if (socket_desc_main == 1)
+    {
+        printf("Could not init socket Server!\n");
+        return 1;
+    }
+    new_socket_main = socket_handshake_server(socket_desc_main);
+    send_image(new_socket_main);
+    close(socket_desc_main);
+    fflush(stdout);
+    printf("Server Socket Closed!!!\n");
+
+
 
     return 0;
 }
