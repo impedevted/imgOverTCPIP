@@ -11,10 +11,6 @@
 //This function is to be used once we have confirmed that an image is to be sent
 //It should read and output an image file
 
-char img_dir[] = "./image/";
-char img_filename_1[] = "capture1.jpeg";
-char img_filename_2[] = "capture2.jpeg";
-
 int send_text(int socket)
 {
     int n;
