@@ -104,6 +104,7 @@ int send_image(int socket)
         //Zero out our send buffer
         bzero(send_buffer, sizeof(send_buffer));
     }
+    fclose(picture);
 }
 
 int receive_image(int socket)
